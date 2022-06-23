@@ -1,0 +1,23 @@
+body {
+    background-image: url("/bgPic");
+    height: 100%;
+    width: 100%;
+    background-clip: inherit;
+    background-position: none;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.heading {
+    width: 50%;
+    font-family: cursive;
+    background-color: rgb(25, 207, 153);
+    border: hidden;
+    border-radius: 20px;
+    range: initial;
+    text-align: center;
+    align-self: center;
+    align-items: center;
+    align-content: center;
+    margin-left: 25%;
+}
