@@ -1,0 +1,19 @@
+<script>
+	if ('WebSocket' in window) {
+		var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+		var address = protocol + window.location.host + '/sakthi/mahendran/2005/ws'
+		var socket = new WebSocket(address);
+	
+		socket.onmessage = function (msg) {
+			console.log(msg.data)
+			if (msg.data == 'reload') {
+				window.location.reload();
+			}
+		}
+
+	} else {
+		window.alert("Browser does'nt support live reload. Please upgrade your browser (by LiveServer)")
+		console.log("Browser does'nt support live reload. Please upgrade your browser (by LiveServer)")
+	}
+</script>
+	
