@@ -1,0 +1,14 @@
+module main
+
+require filelistener v1.0.0 // indirect
+
+replace filelistener v1.0.0 => /filelistener
+
+require (
+	github.com/gorilla/websocket v1.5.0 // indirect
+	webserver v1.0.0
+)
+
+replace webserver v1.0.0 => /webserver
+
+go 1.18
