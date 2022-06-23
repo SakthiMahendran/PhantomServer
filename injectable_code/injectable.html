@@ -5,7 +5,7 @@
 		var socket = new WebSocket(address);
 	
 		socket.onmessage = function (msg) {
-			console.log(msg.data)
+			
 			if (msg.data == 'reload') {
 				window.location.reload();
 			}
