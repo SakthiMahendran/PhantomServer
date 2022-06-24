@@ -114,3 +114,20 @@ You can see a icon in the tab of your webpage.
 
 Note:The LiveReload will work only after a file is served for a webrequest.
 ---
+---
+
+## TODO:
+
+1. Implementation of loging system:
+    
+    Currently the application will just print the error or any other message in stdout blankly 
+    but in upcoming releases i am planning to make an logging system which will log the entire 
+    message and error from the application to the stdout and also to an file with timestamps.
+
+2. Opening browser:
+    
+    Currently after starting the server we have to head to the browser and 
+    open the webpage manually in upcomming release this will be automated. 
+    
+    
+    
