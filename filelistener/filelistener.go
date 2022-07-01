@@ -1,7 +1,6 @@
 package filelistener
 
 import (
-	"fmt"
 	"os"
 	"time"
 )
@@ -30,11 +29,7 @@ func (fl *FileListener) Start() {
 
 		for range time.Tick(rate) {
 
-			lastStat, err := os.Stat(filePath)
-
-			if err != nil {
-				fmt.Printf(err.Error())
-			}
+			lastStat, _ := os.Stat(filePath)
 
 			lastMod := lastStat.ModTime()
 

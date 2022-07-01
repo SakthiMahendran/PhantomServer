@@ -1,11 +1,9 @@
 package webserver
 
 import (
-	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
+	"statuslogger"
 	"time"
 )
 
@@ -19,12 +17,14 @@ const WS_REQUEST_PATH string = "/sakthi/mahendran/2005/ws"
 const RATE time.Duration = time.Millisecond * 250
 
 //Makes a new HttpServer at the given port
-func NewHttpServer() HttpServer {
+func NewHttpServer(sl *statuslogger.StatusLogger) HttpServer {
+
 	hs := HttpServer{}
-	hs.wss = NewWsServer()
-	hs.port = 80
+	hs.wsServer = NewWsServer(sl)
+	hs.port = "80"
 	hs.requestMap = make(map[string]string)
 	hs.running = false
+	hs.logger = sl
 
 	return hs
 }
@@ -32,66 +32,79 @@ func NewHttpServer() HttpServer {
 //HttpServer struct
 type HttpServer struct {
 	requestMap   map[string]string
-	port         int
+	port         string
 	running      bool
 	favIconPath  string
 	mainHtmlPath string
-	wss          WsServer
+	wsServer     WsServer
+	logger       *statuslogger.StatusLogger
 }
 
 //Starts the server if it is not already started
 //Throws error if already Started
 func (hs *HttpServer) Start() {
-	fmt.Println("Starting server at port ", hs.port, ".")
+	hs.logger.LogInfo("Starting server at port ", hs.port, ".")
 
 	if hs.running {
-		fmt.Println("Server already started.")
+		hs.logger.LogErr("Server already started can not start again.")
 		return
 	}
 
 	hs.running = true
 
-	http.HandleFunc(WS_REQUEST_PATH, hs.wss.Start)
-	http.HandleFunc("/favicon.ico", hs.respondFavIcon)
+	http.HandleFunc(WS_REQUEST_PATH, hs.wsServer.Start)
 	http.HandleFunc("/", hs.requestHandler)
 
-	go http.ListenAndServe(fmt.Sprint(":", hs.port), nil)
+	go http.ListenAndServe(":"+hs.port, nil)
 
-	fmt.Println("Server started.")
+	hs.logger.LogInfo("Server started.")
 }
-func (hs *HttpServer) SetPort(port int) {
+
+func (hs *HttpServer) SetPort(port string) {
+	hs.logger.LogInfo("Setting ", port, " as Server Port")
+
 	if !hs.running {
 		hs.port = port
-		fmt.Println("Server port is seted to ", port)
+		hs.logger.LogInfo("Server port is seted to ", port)
 	} else {
-		fmt.Println("Server already started can not change the port.")
+		hs.logger.LogErr("Server already started can not change the port.")
 	}
 }
 
 //Sets the FavIcon file path
 func (hs *HttpServer) SetFavIcon(favIconPath string) {
+	hs.logger.LogInfo("Setting ", favIconPath, " as FavIconPath.")
+
+	if !hs.validPath(favIconPath) {
+		hs.logger.LogErr(favIconPath, " is not a valid path.")
+		return
+	}
+
 	hs.favIconPath = favIconPath
-	fmt.Println(favIconPath, " is seted as FavIconPath.")
+	hs.requestMap["/favicon.ico"] = favIconPath
+
+	hs.logger.LogInfo(favIconPath, " is seted as FavIconPath.")
 }
 
 //Sets the main html file path
 //returns error if the givenFilePath does not contain a html file
 func (hs *HttpServer) SetMainHtml(mainHtmlPath string) {
-	fmt.Println("Setting ", mainHtmlPath, " as MainHtml file.")
+	hs.logger.LogInfo("Setting ", mainHtmlPath, " as MainHtml file.")
 
 	if !hs.validPath(mainHtmlPath) {
-		fmt.Println(mainHtmlPath, " is not a valid path.")
+		hs.logger.LogErr(mainHtmlPath, " is not a valid path.")
 		return
 	}
 
-	if hs.hasHtml(mainHtmlPath) {
-		hs.mainHtmlPath = mainHtmlPath
-		hs.requestMap["/"] = mainHtmlPath
-
-		fmt.Println(mainHtmlPath, " was seted as MainHtml file.")
-	} else {
-		fmt.Println(mainHtmlPath, " is not a Html file.")
+	if !hs.hasHtml(mainHtmlPath) {
+		hs.logger.LogErr(mainHtmlPath, " is not a Html file.")
+		return
 	}
+
+	hs.mainHtmlPath = mainHtmlPath
+	hs.requestMap["/"] = mainHtmlPath
+
+	hs.logger.LogInfo(mainHtmlPath, " was seted as MainHtml file.")
 }
 
 //Links request_url_path with file_path
@@ -99,9 +112,9 @@ func (hs *HttpServer) SetMainHtml(mainHtmlPath string) {
 func (hs *HttpServer) LinkRes(rqst, res string) {
 	if hs.validPath(res) {
 		hs.requestMap[rqst] = res
-		fmt.Println("Linked.")
+		hs.logger.LogInfo("Linked.")
 	} else {
-		fmt.Println(res, " is not a ValidPath")
+		hs.logger.LogErr(res, " is not a ValidPath")
 	}
 }
 
@@ -111,7 +124,7 @@ func (hs *HttpServer) IsRunning() bool {
 }
 
 //Gives the port number of the server
-func (hs *HttpServer) GetPort() int {
+func (hs *HttpServer) GetPort() string {
 	return hs.port
 }
 
@@ -119,13 +132,14 @@ func (hs *HttpServer) GetPort() int {
 //Responds with the appropriate file for the request_url_path from the rqstMap
 func (hs *HttpServer) requestHandler(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println()
-	fmt.Println("request: ", r.URL.Path)
+	hs.logger.NewLine()
+	hs.logger.LogInfo("request: ", r.URL.Path)
 
 	if filePath, ok := hs.requestMap[r.URL.Path]; ok {
 
-		go hs.wss.AddFileListener(filePath, RATE)
-		fmt.Println("response: ", filePath)
+		go hs.wsServer.AddFileListener(filePath, RATE)
+
+		hs.logger.LogInfo("response: ", filePath)
 
 		if filePath == hs.mainHtmlPath {
 			hs.respondMainHtml(w, r)
@@ -135,10 +149,11 @@ func (hs *HttpServer) requestHandler(w http.ResponseWriter, r *http.Request) {
 
 		} else {
 			hs.respondResFile(w, r, filePath)
-
 		}
+
 	} else {
-		fmt.Println("response: Page not found (404)")
+		w.WriteHeader(http.StatusNotFound)
+		hs.logger.LogErr("response: resource not found (404)")
 	}
 }
 
@@ -147,10 +162,10 @@ func (hs *HttpServer) respondMainHtml(w http.ResponseWriter, r *http.Request) {
 	injected, err := hs.injectCode(hs.mainHtmlPath)
 
 	if err != nil {
-		fmt.Printf(err.Error())
+		hs.logger.LogErr(err.Error())
 	}
 
-	fmt.Fprint(w, string(injected))
+	w.Write(injected)
 }
 
 //responds the Resource File
@@ -160,29 +175,28 @@ func (hs *HttpServer) respondResFile(w http.ResponseWriter, r *http.Request, res
 
 //responds the FavIcon
 func (hs *HttpServer) respondFavIcon(w http.ResponseWriter, r *http.Request) {
-	if hs.favIconPath != "" {
-		http.ServeFile(w, r, hs.favIconPath)
-	}
+	http.ServeFile(w, r, hs.favIconPath)
 }
 
 //injects the code from INJECTABLE_CODE_PATH
 func (hs *HttpServer) injectCode(htmlFilePath string) ([]byte, error) {
-	file, err := ioutil.ReadFile(htmlFilePath)
+	fileContent, err := os.ReadFile(htmlFilePath)
+
 	if err != nil {
 		return nil, err
 	}
 
-	code, err := ioutil.ReadFile(INJECTABLE_CODE_PATH)
+	code, err := os.ReadFile(INJECTABLE_CODE_PATH)
 	if err != nil {
 		return nil, err
 	}
 
-	return append(file, []byte(code)...), nil
+	return append(fileContent, code...), nil
 }
 
 //Checks whether the given filepath contains html file
 func (hs *HttpServer) hasHtml(filePath string) bool {
-	return strings.HasSuffix(filePath, ".html")
+	return filePath[len(filePath)-5:] == ".html"
 }
 
 func (hs *HttpServer) validPath(filePath string) bool {

@@ -2,19 +2,25 @@ package main
 
 import (
 	"fmt"
-	"strconv"
+	"statuslogger"
 	"strings"
 	"webserver"
 )
 
-func NewCmdExe() CmdExe {
-	return CmdExe{}
+func NewCmdExe(hs *webserver.HttpServer, sl *statuslogger.StatusLogger) CmdExe {
+	ce := CmdExe{}
+	ce.httpServer = hs
+	ce.logger = sl
+
+	return ce
 }
 
 type CmdExe struct {
+	httpServer *webserver.HttpServer
+	logger     *statuslogger.StatusLogger
 }
 
-func (ce *CmdExe) exe(cmd string, hs *webserver.HttpServer) {
+func (ce *CmdExe) exe(cmd string) {
 	cmdArr := strings.Split(cmd, " ")
 	key := strings.TrimSpace(cmdArr[0])
 	cmdArrLen := len(cmdArr)
@@ -23,42 +29,43 @@ func (ce *CmdExe) exe(cmd string, hs *webserver.HttpServer) {
 	case "setmain":
 		if cmdArrLen == 2 {
 			main := strings.TrimSpace(cmdArr[1])
-			hs.SetMainHtml(main)
+			ce.httpServer.SetMainHtml(main)
 			break
 		} else {
-			fmt.Println("setmain takes 1 arguments but ", cmdArrLen, " provided.")
+			ce.logger.LogErr("setmain takes 1 argument but ", cmdArrLen-1, " provided.")
+			break
 		}
 	case "setfavicon":
 		if cmdArrLen == 2 {
 			fav := strings.TrimSpace(cmdArr[1])
-			hs.SetFavIcon(fav)
+			ce.httpServer.SetFavIcon(fav)
 			break
 		} else {
-			fmt.Println("setfavicon takes 1 arguments but ", cmdArrLen, " provided.")
+			ce.logger.LogErr("setfavicon takes 1 arguments but ", cmdArrLen-1, " provided.")
+			break
 		}
 	case "link":
 		if cmdArrLen == 3 {
 			req := strings.TrimSpace(cmdArr[1])
 			res := strings.TrimSpace(cmdArr[2])
-			hs.LinkRes(req, res)
+			ce.httpServer.LinkRes(req, res)
 			break
 		} else {
-			fmt.Println("link takes 2 arguments but ", cmdArrLen, " provided.")
+			ce.logger.LogErr("link takes 2 arguments but ", cmdArrLen-1, " provided.")
+			break
 		}
 	case "start":
 		if cmdArrLen == 2 {
-			port, err := strconv.Atoi(strings.TrimSpace(cmdArr[1]))
+			port := strings.TrimSpace(cmdArr[1])
 
-			if err == nil {
-				hs.SetPort(port)
-				hs.Start()
-			} else {
-				fmt.Println(err.Error())
-			}
+			ce.httpServer.SetPort(port)
+			ce.httpServer.Start()
+			break
 		} else {
-			hs.Start()
+			ce.httpServer.SetPort(fmt.Sprint(80))
+			ce.httpServer.Start()
+			break
 		}
-		break
 	case "help":
 		fmt.Println("setmain   	-> Sets the path for MainHtml file (syntax: setmain MainHtmlPath).")
 		fmt.Println("setfavicon	-> Sets the path for PageIcon 	   (syntax: setfavicon FavIconPath).")
@@ -67,9 +74,8 @@ func (ce *CmdExe) exe(cmd string, hs *webserver.HttpServer) {
 		fmt.Println("help      	-> Gives info about the available commands.")
 		break
 	default:
-		fmt.Println(cmd, " is not a valid Command.")
-		fmt.Println("type \"help\" for Help.")
+		ce.logger.LogErr(cmd, " is not a valid Command.")
+		ce.logger.LogInfo("type \"help\" for Help.")
 		break
 	}
-
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"statuslogger"
 	"strings"
 	"webserver"
 )
@@ -15,19 +16,22 @@ func main() {
 
 	setMinThreads()
 
-	hs := webserver.NewHttpServer()
-	var cmd string
-	cmdExe := NewCmdExe()
+	sl := statuslogger.NewStatusLogger()
+	hs := webserver.NewHttpServer(&sl)
 
-	fmt.Println("Ready to use...")
+	var cmd string
+	cmdExe := NewCmdExe(&hs, &sl)
+
+	sl.LogInfo("Ready to use...")
 
 	for {
-		fmt.Println()
+		sl.NewLine()
 		fmt.Print("Enter your command: ")
 		cmd = readln()
 
 		if cmd != "" {
-			cmdExe.exe(cmd, &hs)
+			sl.LogInfo("Executing Command ", "\"", cmd, "\"")
+			cmdExe.exe(cmd)
 		}
 	}
 }
