@@ -2,15 +2,9 @@ package webserver
 
 import (
 	"net/http"
-	"os"
-	"os/exec"
-	"runtime"
 	"statuslogger"
 	"time"
 )
-
-//Defines the path for the javascript file which contains the code to be injected
-const INJECTABLE_CODE_PATH string = "injectable_code/injectable.html"
 
 //Defines the WS(Web Socket) Request_Path
 const WS_REQUEST_PATH string = "/sakthi/mahendran/2005/ws"
@@ -27,6 +21,7 @@ func NewHttpServer(sl *statuslogger.StatusLogger) HttpServer {
 	hs.requestMap = make(map[string]string)
 	hs.running = false
 	hs.logger = sl
+	hs.util = utility{}
 
 	return hs
 }
@@ -40,6 +35,7 @@ type HttpServer struct {
 	mainHtmlPath string
 	wsServer     WsServer
 	logger       *statuslogger.StatusLogger
+	util         utility
 }
 
 //Starts the server if it is not already started
@@ -62,7 +58,7 @@ func (hs *HttpServer) Start() {
 	hs.logger.LogInfo("Server started.")
 
 	hs.logger.LogInfo("Opening webpage in browser.")
-	err := hs.openbrowser("http://localhost/")
+	err := hs.util.openbrowser("http://localhost/")
 
 	if err != nil {
 		hs.logger.LogErr(err)
@@ -87,7 +83,7 @@ func (hs *HttpServer) SetPort(port string) {
 func (hs *HttpServer) SetFavIcon(favIconPath string) {
 	hs.logger.LogInfo("Setting ", favIconPath, " as FavIconPath.")
 
-	if !hs.validPath(favIconPath) {
+	if hs.util.validPath(favIconPath) {
 		hs.logger.LogErr(favIconPath, " is not a valid path.")
 		return
 	}
@@ -103,12 +99,12 @@ func (hs *HttpServer) SetFavIcon(favIconPath string) {
 func (hs *HttpServer) SetMainHtml(mainHtmlPath string) {
 	hs.logger.LogInfo("Setting ", mainHtmlPath, " as MainHtml file.")
 
-	if !hs.validPath(mainHtmlPath) {
+	if hs.util.validPath(mainHtmlPath) {
 		hs.logger.LogErr(mainHtmlPath, " is not a valid path.")
 		return
 	}
 
-	if !hs.hasHtml(mainHtmlPath) {
+	if hs.util.hasHtml(mainHtmlPath) {
 		hs.logger.LogErr(mainHtmlPath, " is not a Html file.")
 		return
 	}
@@ -122,7 +118,7 @@ func (hs *HttpServer) SetMainHtml(mainHtmlPath string) {
 //Links request_url_path with file_path
 //So that if the request contains the given url_path then file from the given file_path is responded
 func (hs *HttpServer) LinkRes(rqst, res string) {
-	if hs.validPath(res) {
+	if hs.util.validPath(res) {
 		hs.requestMap[rqst] = res
 		hs.logger.LogInfo("Linked.")
 	} else {
@@ -155,7 +151,6 @@ func (hs *HttpServer) requestHandler(w http.ResponseWriter, r *http.Request) {
 
 		if filePath == hs.mainHtmlPath {
 			hs.respondMainHtml(w, r)
-
 		} else if filePath == hs.favIconPath {
 			hs.respondFavIcon(w, r)
 
@@ -171,7 +166,7 @@ func (hs *HttpServer) requestHandler(w http.ResponseWriter, r *http.Request) {
 
 //responds the main html file with injected javascript code
 func (hs *HttpServer) respondMainHtml(w http.ResponseWriter, r *http.Request) {
-	injected, err := hs.injectCode(hs.mainHtmlPath)
+	injected, err := hs.util.injectCode(hs.mainHtmlPath)
 
 	if err != nil {
 		hs.logger.LogErr(err.Error())
@@ -188,52 +183,4 @@ func (hs *HttpServer) respondResFile(w http.ResponseWriter, r *http.Request, res
 //responds the FavIcon
 func (hs *HttpServer) respondFavIcon(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, hs.favIconPath)
-}
-
-//injects the code from INJECTABLE_CODE_PATH
-func (hs *HttpServer) injectCode(htmlFilePath string) ([]byte, error) {
-	fileContent, err := os.ReadFile(htmlFilePath)
-
-	if err != nil {
-		return nil, err
-	}
-
-	code, err := os.ReadFile(INJECTABLE_CODE_PATH)
-	if err != nil {
-		return nil, err
-	}
-
-	return append(fileContent, code...), nil
-}
-
-//Checks whether the given filepath contains html file
-func (hs *HttpServer) hasHtml(filePath string) bool {
-	return filePath[len(filePath)-5:] == ".html"
-}
-
-func (hs *HttpServer) validPath(filePath string) bool {
-	if _, err := os.Stat(filePath); err == nil {
-		return true
-	}
-
-	return false
-}
-
-//Opens the URL in default browser.
-func (hs *HttpServer) openbrowser(url string) error {
-	var cmd string
-	var args []string
-
-	switch runtime.GOOS {
-	case "windows":
-		cmd = "cmd"
-		args = []string{"/c", "start"}
-	case "darwin":
-		cmd = "open"
-	default: // "linux", "freebsd", "openbsd", "netbsd"
-		cmd = "xdg-open"
-	}
-
-	args = append(args, url)
-	return exec.Command(cmd, args...).Start()
 }

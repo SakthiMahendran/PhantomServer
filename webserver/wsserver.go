@@ -41,16 +41,16 @@ func (ws *WsServer) Start(w http.ResponseWriter, r *http.Request) {
 	lc := ws.mfl.GetListenChan()
 
 	go func(w http.ResponseWriter, r *http.Request, listenChan <-chan struct{}) {
-		for range listenChan {
-			err := ws.con.WriteMessage(websocket.TextMessage, []byte("reload"))
+		<-listenChan
 
-			if err != nil {
-				ws.logger.LogErr(err.Error())
-			}
+		err := ws.con.WriteMessage(websocket.TextMessage, []byte("reload"))
 
-			ws.con.Close()
-			break
+		if err != nil {
+			ws.logger.LogErr(err.Error())
 		}
+
+		ws.con.Close()
+
 	}(w, r, lc)
 }
 
