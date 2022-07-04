@@ -3,6 +3,8 @@ package webserver
 import (
 	"net/http"
 	"os"
+	"os/exec"
+	"runtime"
 	"statuslogger"
 	"time"
 )
@@ -58,6 +60,16 @@ func (hs *HttpServer) Start() {
 	go http.ListenAndServe(":"+hs.port, nil)
 
 	hs.logger.LogInfo("Server started.")
+
+	hs.logger.LogInfo("Opening webpage in browser.")
+	err := hs.openbrowser("http://localhost/")
+
+	if err != nil {
+		hs.logger.LogErr(err)
+	} else {
+		hs.logger.LogInfo("Webpage opened in browser.")
+	}
+
 }
 
 func (hs *HttpServer) SetPort(port string) {
@@ -205,4 +217,23 @@ func (hs *HttpServer) validPath(filePath string) bool {
 	}
 
 	return false
+}
+
+//Opens the URL in default browser.
+func (hs *HttpServer) openbrowser(url string) error {
+	var cmd string
+	var args []string
+
+	switch runtime.GOOS {
+	case "windows":
+		cmd = "cmd"
+		args = []string{"/c", "start"}
+	case "darwin":
+		cmd = "open"
+	default: // "linux", "freebsd", "openbsd", "netbsd"
+		cmd = "xdg-open"
+	}
+
+	args = append(args, url)
+	return exec.Command(cmd, args...).Start()
 }
