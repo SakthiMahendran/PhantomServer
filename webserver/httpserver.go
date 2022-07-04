@@ -99,12 +99,12 @@ func (hs *HttpServer) SetFavIcon(favIconPath string) {
 func (hs *HttpServer) SetMainHtml(mainHtmlPath string) {
 	hs.logger.LogInfo("Setting ", mainHtmlPath, " as MainHtml file.")
 
-	if hs.util.validPath(mainHtmlPath) {
+	if !hs.util.validPath(mainHtmlPath) {
 		hs.logger.LogErr(mainHtmlPath, " is not a valid path.")
 		return
 	}
 
-	if hs.util.hasHtml(mainHtmlPath) {
+	if !hs.util.hasHtml(mainHtmlPath) {
 		hs.logger.LogErr(mainHtmlPath, " is not a Html file.")
 		return
 	}
