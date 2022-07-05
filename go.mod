@@ -1,7 +1,7 @@
 module main
 
 require (
-	statuslogger v1.0.0 // indirect
+	statuslogger v1.0.0
 )
 
 replace statuslogger v1.0.0 => /statuslogger
@@ -11,7 +11,6 @@ require (
 )
 
 replace filelistener v1.0.0 => /filelistener
-
 
 require (
 	github.com/gorilla/websocket v1.5.0 // indirect
