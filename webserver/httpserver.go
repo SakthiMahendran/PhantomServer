@@ -116,6 +116,7 @@ func (hs *HttpServer) SetMainHtml(mainHtmlPath string) {
 func (hs *HttpServer) LinkRes(rqst, res string) {
 	if hs.util.validPath(res) {
 		hs.requestMap[rqst] = res
+		hs.wsServer.Reload()
 		hs.logger.LogInfo("Linked.")
 	} else {
 		hs.logger.LogErr(res, " is not a ValidPath")

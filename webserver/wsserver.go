@@ -42,7 +42,7 @@ func (ws *WsServer) Start(w http.ResponseWriter, r *http.Request) {
 	go func(w http.ResponseWriter, r *http.Request, listenChan <-chan struct{}) {
 		<-listenChan
 
-		err := ws.con.WriteMessage(websocket.TextMessage, []byte("reload"))
+		err := ws.Reload()
 
 		if err != nil {
 			ws.logger.LogErr(err.Error())
@@ -51,6 +51,12 @@ func (ws *WsServer) Start(w http.ResponseWriter, r *http.Request) {
 		ws.con.Close()
 
 	}(w, r, lc)
+}
+
+func (ws *WsServer) Reload() error {
+	err := ws.con.WriteMessage(websocket.TextMessage, []byte("reload"))
+	ws.con.Close()
+	return err
 }
 
 func (ws *WsServer) AddFileListener(filePath string) {
