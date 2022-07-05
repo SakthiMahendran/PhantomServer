@@ -6,8 +6,27 @@ import (
 	"runtime"
 )
 
-//Defines the path for the javascript file which contains the code to be injected
-const INJECTABLE_CODE_PATH string = "injectable_code/injectable.html"
+//code to be injected
+var INJECTABLE_CODE = []byte(`
+<script>
+	if ('WebSocket' in window) {
+		var protocol = 'ws://';
+		var address = protocol + window.location.host + '/sakthi/mahendran/2005/ws'
+		var socket = new WebSocket(address);
+	
+		socket.onmessage = function (msg) {
+			console.log(msg.data)
+		    if (msg.data == 'reload') {
+				window.location.reload();
+			}
+		}
+
+	} else {
+		window.alert("Browser does'nt support live reload. Please upgrade your browser (by LiveServer)")
+		console.log("Browser does'nt support live reload. Please upgrade your browser (by LiveServer)")
+	}
+</script>
+`)
 
 type utility struct {
 }
@@ -20,12 +39,7 @@ func (*utility) injectCode(htmlFilePath string) ([]byte, error) {
 		return nil, err
 	}
 
-	code, err := os.ReadFile(INJECTABLE_CODE_PATH)
-	if err != nil {
-		return nil, err
-	}
-
-	return append(fileContent, code...), nil
+	return append(fileContent, INJECTABLE_CODE...), nil
 }
 
 //Checks whether the given filepath contains html file
