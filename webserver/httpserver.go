@@ -3,14 +3,10 @@ package webserver
 import (
 	"net/http"
 	"statuslogger"
-	"time"
 )
 
 //Defines the WS(Web Socket) Request_Path
 const WS_REQUEST_PATH string = "/sakthi/mahendran/2005/ws"
-
-//Defines the
-const RATE time.Duration = time.Millisecond * 250
 
 //Makes a new HttpServer at the given port
 func NewHttpServer(sl *statuslogger.StatusLogger) HttpServer {
@@ -145,7 +141,7 @@ func (hs *HttpServer) requestHandler(w http.ResponseWriter, r *http.Request) {
 
 	if filePath, ok := hs.requestMap[r.URL.Path]; ok {
 
-		go hs.wsServer.AddFileListener(filePath, RATE)
+		go hs.wsServer.AddFileListener(filePath)
 
 		hs.logger.LogInfo("response: ", filePath)
 

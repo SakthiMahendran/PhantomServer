@@ -5,11 +5,13 @@ import (
 	"time"
 )
 
-func NewFileListener(filePath string, rate time.Duration) FileListener {
+const RATE time.Duration = time.Millisecond * 250
+
+func NewFileListener(filePath string) FileListener {
 	fl := FileListener{}
 
 	fl.filePath = filePath
-	fl.rate = rate
+	fl.rate = RATE
 
 	return fl
 }

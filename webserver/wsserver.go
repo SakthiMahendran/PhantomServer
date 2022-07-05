@@ -4,7 +4,6 @@ import (
 	"filelistener"
 	"net/http"
 	"statuslogger"
-	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -54,7 +53,7 @@ func (ws *WsServer) Start(w http.ResponseWriter, r *http.Request) {
 	}(w, r, lc)
 }
 
-func (ws *WsServer) AddFileListener(filePath string, rate time.Duration) {
-	fl := filelistener.NewFileListener(filePath, rate)
+func (ws *WsServer) AddFileListener(filePath string) {
+	fl := filelistener.NewFileListener(filePath)
 	ws.mfl.Add(fl)
 }
