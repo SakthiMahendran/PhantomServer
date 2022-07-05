@@ -48,8 +48,6 @@ func (ws *WsServer) Start(w http.ResponseWriter, r *http.Request) {
 			ws.logger.LogErr(err.Error())
 		}
 
-		ws.con.Close()
-
 	}(w, r, lc)
 }
 
