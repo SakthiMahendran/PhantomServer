@@ -169,15 +169,30 @@ func (hs *HttpServer) respondMainHtml(w http.ResponseWriter, r *http.Request) {
 		hs.logger.LogErr(err.Error())
 	}
 
+	//Disabling cache.
+	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate") // HTTP 1.1.
+	w.Header().Set("Pragma", "no-cache")                                   // HTTP 1.0.
+	w.Header().Set("Expires", "0")                                         // Proxies.
+
 	w.Write(injected)
 }
 
 //responds the Resource File
 func (hs *HttpServer) respondResFile(w http.ResponseWriter, r *http.Request, resFilePath string) {
+	//Disabling cache.
+	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate") // HTTP 1.1.
+	w.Header().Set("Pragma", "no-cache")                                   // HTTP 1.0.
+	w.Header().Set("Expires", "0")                                         // Proxies.
+
 	http.ServeFile(w, r, resFilePath)
 }
 
 //responds the FavIcon
 func (hs *HttpServer) respondFavIcon(w http.ResponseWriter, r *http.Request) {
+	//Disabling cache.
+	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate") // HTTP 1.1.
+	w.Header().Set("Pragma", "no-cache")                                   // HTTP 1.0.
+	w.Header().Set("Expires", "0")                                         // Proxies.
+
 	http.ServeFile(w, r, hs.favIconPath)
 }
