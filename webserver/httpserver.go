@@ -65,7 +65,7 @@ func (hs *HttpServer) Start() {
 }
 
 func (hs *HttpServer) SetPort(port string) {
-	hs.logger.LogInfo("Setting ", port, " as Server Port")
+	hs.logger.LogInfo("Setting ", port, " as Server Port.")
 
 	if !hs.running {
 		hs.port = port
@@ -79,7 +79,7 @@ func (hs *HttpServer) SetPort(port string) {
 func (hs *HttpServer) SetFavIcon(favIconPath string) {
 	hs.logger.LogInfo("Setting ", favIconPath, " as FavIconPath.")
 
-	if hs.util.validPath(favIconPath) {
+	if !hs.util.validPath(favIconPath) {
 		hs.logger.LogErr(favIconPath, " is not a valid path.")
 		return
 	}
@@ -113,13 +113,13 @@ func (hs *HttpServer) SetMainHtml(mainHtmlPath string) {
 
 //Links request_url_path with file_path
 //So that if the request contains the given url_path then file from the given file_path is responded
-func (hs *HttpServer) LinkRes(rqst, res string) {
-	if hs.util.validPath(res) {
-		hs.requestMap[rqst] = res
+func (hs *HttpServer) LinkRes(reqst, resPath string) {
+	if hs.util.validPath(resPath) {
+		hs.requestMap[reqst] = resPath
 		hs.wsServer.Reload()
 		hs.logger.LogInfo("Linked.")
 	} else {
-		hs.logger.LogErr(res, " is not a ValidPath")
+		hs.logger.LogErr(resPath, " is not a ValidPath.")
 	}
 }
 
@@ -167,6 +167,7 @@ func (hs *HttpServer) respondMainHtml(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		hs.logger.LogErr(err.Error())
+		return
 	}
 
 	//Disabling cache.
