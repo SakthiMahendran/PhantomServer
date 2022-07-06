@@ -123,16 +123,6 @@ func (hs *HttpServer) LinkRes(reqst, resPath string) {
 	}
 }
 
-//Indicates whether the server is running or not
-func (hs *HttpServer) IsRunning() bool {
-	return hs.running
-}
-
-//Gives the port number of the server
-func (hs *HttpServer) GetPort() string {
-	return hs.port
-}
-
 //Handles the incoming request
 //Responds with the appropriate file for the request_url_path from the rqstMap
 func (hs *HttpServer) requestHandler(w http.ResponseWriter, r *http.Request) {
