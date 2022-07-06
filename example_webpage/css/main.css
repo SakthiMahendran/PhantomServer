@@ -4,8 +4,7 @@ body {
     width: 100%;
     background-clip: inherit;
     background-position: none;
-    background-repeat: no-repeat;
-    background-size: cover;
+    background-size:cover;
 }
 
 .heading {
