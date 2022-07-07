@@ -12,7 +12,6 @@ func NewWsServer(sl *statuslogger.StatusLogger) WsServer {
 	ws := WsServer{}
 	ws.mfl = filelistener.NewMultiFileListener()
 	ws.logger = sl
-	ws.connected = false
 
 	return ws
 }
@@ -38,8 +37,6 @@ func (ws *WsServer) Start(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ws.con = con
-	ws.connected = true
-
 	lc := ws.mfl.GetListenChan()
 
 	go func(w http.ResponseWriter, r *http.Request, listenChan <-chan struct{}) {
@@ -55,10 +52,9 @@ func (ws *WsServer) Start(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ws *WsServer) Reload() error {
-	if ws.connected {
+	if ws.con != nil {
 		err := ws.con.WriteMessage(websocket.TextMessage, []byte("reload"))
 		ws.con.Close()
-		ws.connected = false
 		return err
 	} else {
 		return nil
