@@ -1,37 +1,51 @@
 package filelistener
 
-func NewMultiFileListener() MultiFileListener {
-	mfl := MultiFileListener{}
-	mfl.listenChan = make(chan struct{})
+//First read the "filelistener.go", description and then the code line by line with the comments to for a better understanding.
 
-	return mfl
+//Description
+/*
+	"multifilelistener" is designed to handle multiple "filelistener".
+	it sets a single channel for all of the "filelistener" in it's control to send signal.
+	So that we get a single channel to look for signal instead of looking
+	into all of the filelistener's channel.
+*/
+
+//Makes a new "MultiFileListener".
+func NewMultiFileListener() MultiFileListener {
+	mfl := MultiFileListener{}           //Instantiation.
+	mfl.listenChan = make(chan struct{}) //Makes a new channel for signaling changes in any file.
+
+	return mfl // Returning.
 }
 
 type MultiFileListener struct {
-	filePaths  []string
-	listenChan chan struct{}
+	filePaths  []string      // Contains the paths of files to be listened for changes.
+	listenChan chan struct{} // Singnal will be send through this channel if there is changes in any file.
 }
 
+//Adds a new "FileListener" to be handled.
 func (mfl *MultiFileListener) Add(fileListener FileListener) {
-	if !mfl.alreadyAdded(&fileListener) {
-		mfl.filePaths = append(mfl.filePaths, fileListener.filePath)
-		fileListener.listenChan = mfl.listenChan
-		fileListener.Start()
+	if !mfl.alreadyAdded(&fileListener) { // Checks wheather the file is already added.
+		//if not
+		mfl.filePaths = append(mfl.filePaths, fileListener.filePath) //Add the path of the file to filePaths.
+		fileListener.listenChan = mfl.listenChan                     //Sets the signaling channel for filelistener.
+		fileListener.Start()                                         //Starts the file listener.
 	}
 }
 
 func (mfl *MultiFileListener) GetListenChan() <-chan struct{} {
-	return mfl.listenChan
+	return mfl.listenChan // returns the listenChan
 }
 
+//Checks wheather the given fileListener is already added.
 func (mfl *MultiFileListener) alreadyAdded(fileListener *FileListener) bool {
-	filePath := fileListener.filePath
+	filePath := fileListener.filePath // Gets the "filePath" of fileListener.
 
-	for _, fp := range mfl.filePaths {
+	for _, fp := range mfl.filePaths { //Checks wheather the filePath is in "filePaths" slice.
 		if filePath == fp {
-			return true
+			return true // return "true" if yes.
 		}
 	}
 
-	return false
+	return false // else return "false".
 }

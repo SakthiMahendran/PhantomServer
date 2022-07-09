@@ -47,6 +47,7 @@ func (*utility) hasHtml(filePath string) bool {
 	return filePath[len(filePath)-5:] == ".html"
 }
 
+//Checks wheather the given path is validPath
 func (*utility) validPath(filePath string) bool {
 	if _, err := os.Stat(filePath); err == nil {
 		return true
