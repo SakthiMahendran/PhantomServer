@@ -4,7 +4,10 @@ require statuslogger v1.0.0
 
 replace statuslogger v1.0.0 => /statuslogger
 
-require filelistener v1.0.0 // indirect
+require (
+	filelistener v1.0.0 // indirect
+	github.com/daviddengcn/go-colortext v1.0.0 // indirect
+)
 
 replace filelistener v1.0.0 => /filelistener
 

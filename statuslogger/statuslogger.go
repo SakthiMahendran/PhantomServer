@@ -6,6 +6,8 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	ct "github.com/daviddengcn/go-colortext"
 )
 
 type StatusLogger struct {
@@ -52,8 +54,12 @@ func (sl *StatusLogger) LogErr(a ...any) {
 
 	sl.loggerMutex.Lock()
 
-	sl.logger.SetPrefix("ERR: ")
+	ct.Foreground(ct.Red, false)
+
+	sl.logger.SetPrefix("ERROR: ")
 	sl.logger.Println(logMsg)
+
+	ct.ResetColor()
 
 	sl.loggerMutex.Unlock()
 }
@@ -63,8 +69,12 @@ func (sl *StatusLogger) LogInfo(a ...any) {
 
 	sl.loggerMutex.Lock()
 
+	ct.Foreground(ct.Green, false)
+
 	sl.logger.SetPrefix("INFO: ")
 	sl.logger.Println(logMsg)
+
+	ct.ResetColor()
 
 	sl.loggerMutex.Unlock()
 }
