@@ -44,6 +44,11 @@ func (hs *HttpServer) Start() {
 		return
 	}
 
+	if hs.mainHtmlPath == "" {
+		hs.logger.LogErr("Can't start server without a MainHtml file.")
+		return
+	}
+
 	hs.running = true
 
 	http.HandleFunc(WS_REQUEST_PATH, hs.wsServer.Start)
