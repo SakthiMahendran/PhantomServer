@@ -87,6 +87,8 @@ func (hs *HttpServer) SetFavIcon(favIconPath string) {
 	hs.favIconPath = favIconPath
 	hs.requestMap["/favicon.ico"] = favIconPath
 
+	hs.wsServer.Reload()
+
 	hs.logger.LogInfo(favIconPath, " is seted as FavIconPath.")
 }
 
@@ -108,6 +110,8 @@ func (hs *HttpServer) SetMainHtml(mainHtmlPath string) {
 	hs.mainHtmlPath = mainHtmlPath
 	hs.requestMap["/"] = mainHtmlPath
 
+	hs.wsServer.Reload()
+
 	hs.logger.LogInfo(mainHtmlPath, " was seted as MainHtml file.")
 }
 
@@ -128,13 +132,13 @@ func (hs *HttpServer) LinkRes(reqst, resPath string) {
 func (hs *HttpServer) requestHandler(w http.ResponseWriter, r *http.Request) {
 
 	hs.logger.NewLine()
-	hs.logger.LogInfo("request: ", r.URL.Path)
+	hs.logger.LogInfo("Request: ", r.URL.Path)
 
 	if filePath, ok := hs.requestMap[r.URL.Path]; ok {
-
-		go hs.wsServer.AddFileListener(filePath)
-
-		hs.logger.LogInfo("response: ", filePath)
+		//Disabling Browser cache.
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate") // HTTP 1.1.
+		w.Header().Set("Pragma", "no-cache")                                   // HTTP 1.0.
+		w.Header().Set("Expires", "0")                                         // Proxies.
 
 		if filePath == hs.mainHtmlPath {
 			hs.respondMainHtml(w, r)
@@ -144,9 +148,12 @@ func (hs *HttpServer) requestHandler(w http.ResponseWriter, r *http.Request) {
 			hs.respondResFile(w, r, filePath)
 		}
 
+		hs.logger.LogInfo("Response: ", filePath)
+		hs.wsServer.AddFileListener(filePath)
+
 	} else {
 		w.WriteHeader(http.StatusNotFound)
-		hs.logger.LogErr("response: resource not found (404)")
+		hs.logger.LogErr("Response: resource not found (404)")
 	}
 }
 
@@ -159,30 +166,15 @@ func (hs *HttpServer) respondMainHtml(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Disabling Browser cache.
-	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate") // HTTP 1.1.
-	w.Header().Set("Pragma", "no-cache")                                   // HTTP 1.0.
-	w.Header().Set("Expires", "0")                                         // Proxies.
-
 	w.Write(injected)
 }
 
 //responds the Resource File
 func (hs *HttpServer) respondResFile(w http.ResponseWriter, r *http.Request, resFilePath string) {
-	//Disabling Browser cache.
-	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate") // HTTP 1.1.
-	w.Header().Set("Pragma", "no-cache")                                   // HTTP 1.0.
-	w.Header().Set("Expires", "0")                                         // Proxies.
-
 	http.ServeFile(w, r, resFilePath)
 }
 
 //responds the FavIcon
 func (hs *HttpServer) respondFavIcon(w http.ResponseWriter, r *http.Request) {
-	//Disabling Browser cache.
-	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate") // HTTP 1.1.
-	w.Header().Set("Pragma", "no-cache")                                   // HTTP 1.0.
-	w.Header().Set("Expires", "0")                                         // Proxies.
-
 	http.ServeFile(w, r, hs.favIconPath)
 }
