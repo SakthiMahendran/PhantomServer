@@ -1,14 +1,10 @@
 module main
 
-require (
-	statuslogger v1.0.0
-)
+require statuslogger v1.0.0
 
 replace statuslogger v1.0.0 => /statuslogger
 
-require (
-	filelistener v1.0.0 // indirect
-)
+require filelistener v1.0.0 // indirect
 
 replace filelistener v1.0.0 => /filelistener
 
