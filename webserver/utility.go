@@ -15,8 +15,7 @@ var INJECTABLE_CODE = []byte(`
 		var socket = new WebSocket(address);
 	
 		socket.onmessage = function (msg) {
-			console.log(msg.data)
-		    if (msg.data == 'reload') {
+			if (msg.data == 'reload') {
 				window.location.reload();
 			}
 		}
