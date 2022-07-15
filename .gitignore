@@ -12,6 +12,4 @@
 *.out
 
 #example_webpage
-*.css
-*.html
-*.png
+example_webpage
