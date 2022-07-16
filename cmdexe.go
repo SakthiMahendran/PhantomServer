@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"statuslogger"
 	"strings"
-	"webserver"
+
+	"github.com/SakthiMahendran/PhantomServer/statuslogger"
+	"github.com/SakthiMahendran/PhantomServer/webserver"
 )
 
 func NewCmdExe(hs *webserver.HttpServer, sl *statuslogger.StatusLogger) CmdExe {

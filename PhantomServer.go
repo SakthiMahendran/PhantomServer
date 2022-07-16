@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"os"
 	"runtime"
-	"statuslogger"
 	"strings"
-	"webserver"
+
+	"github.com/SakthiMahendran/PhantomServer/statuslogger"
+	"github.com/SakthiMahendran/PhantomServer/webserver"
 )
 
 var reader = bufio.NewReader(os.Stdin)

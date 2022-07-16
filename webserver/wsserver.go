@@ -1,9 +1,10 @@
 package webserver
 
 import (
-	"filelistener"
 	"net/http"
-	"statuslogger"
+
+	"github.com/SakthiMahendran/PhantomServer/filelistener"
+	"github.com/SakthiMahendran/PhantomServer/statuslogger"
 
 	"github.com/gorilla/websocket"
 )

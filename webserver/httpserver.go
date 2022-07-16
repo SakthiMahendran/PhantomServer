@@ -2,7 +2,8 @@ package webserver
 
 import (
 	"net/http"
-	"statuslogger"
+
+	"github.com/SakthiMahendran/PhantomServer/statuslogger"
 )
 
 //Defines the WS(Web Socket) Request_Path
