@@ -23,46 +23,45 @@ type CmdExe struct {
 func (ce *CmdExe) exe(cmd string) {
 	cmdArr := strings.Split(cmd, " ")
 	key := strings.TrimSpace(cmdArr[0])
-	cmdArrLen := len(cmdArr)
+	argsLen := len(cmdArr) - 1
 
 	switch key {
 	case "setmain":
-		if cmdArrLen == 2 {
+		if argsLen == 1 {
 			main := strings.TrimSpace(cmdArr[1])
 			ce.httpServer.SetMainHtml(main)
 			break
 		} else {
-			ce.logger.LogErr("setmain takes 1 argument but ", cmdArrLen-1, " provided.")
+			ce.logger.LogErr("setmain takes 1 argument but ", argsLen, " provided.")
 			break
 		}
 	case "setfavicon":
-		if cmdArrLen == 2 {
+		if argsLen == 1 {
 			fav := strings.TrimSpace(cmdArr[1])
 			ce.httpServer.SetFavIcon(fav)
 			break
 		} else {
-			ce.logger.LogErr("setfavicon takes 1 arguments but ", cmdArrLen-1, " provided.")
+			ce.logger.LogErr("setfavicon takes 1 arguments but ", argsLen, " provided.")
 			break
 		}
 	case "link":
-		if cmdArrLen == 3 {
+		if argsLen == 2 {
 			req := strings.TrimSpace(cmdArr[1])
 			res := strings.TrimSpace(cmdArr[2])
 			ce.httpServer.LinkRes(req, res)
 			break
 		} else {
-			ce.logger.LogErr("link takes 2 arguments but ", cmdArrLen-1, " provided.")
+			ce.logger.LogErr("link takes 2 arguments but ", argsLen, " provided.")
 			break
 		}
 	case "start":
-		if cmdArrLen == 2 {
+		if argsLen == 1 {
 			port := strings.TrimSpace(cmdArr[1])
 
 			ce.httpServer.SetPort(port)
 			ce.httpServer.Start()
 			break
 		} else {
-			ce.httpServer.SetPort(fmt.Sprint(80))
 			ce.httpServer.Start()
 			break
 		}
