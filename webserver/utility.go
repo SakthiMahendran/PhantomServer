@@ -56,7 +56,7 @@ func (*utility) validPath(filePath string) bool {
 }
 
 //Opens the URL in default browser.
-func (*utility) openbrowser(url string) error {
+func (*utility) openBrowser(url string) error {
 	var cmd string
 	var args []string
 

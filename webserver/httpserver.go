@@ -59,7 +59,7 @@ func (hs *HttpServer) Start() {
 	hs.logger.LogInfo("Server started.")
 
 	hs.logger.LogInfo("Opening webpage in browser.")
-	err := hs.util.openbrowser("http://localhost:" + hs.port + "/")
+	err := hs.util.openBrowser("http://localhost:" + hs.port + "/")
 
 	if err != nil {
 		hs.logger.LogErr(err)
