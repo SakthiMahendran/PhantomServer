@@ -12,10 +12,13 @@ import (
 
 var reader = bufio.NewReader(os.Stdin)
 
+func init() {
+	if runtime.GOMAXPROCS(-1) < 4 {
+		runtime.GOMAXPROCS(4)
+	}
+}
+
 func main() {
-
-	setMinThreads()
-
 	sl := statuslogger.NewStatusLogger()
 	hs := webserver.NewHttpServer(&sl)
 
@@ -41,10 +44,4 @@ func readln() string {
 	line = strings.TrimSpace(line)
 
 	return line
-}
-
-func setMinThreads() {
-	if runtime.GOMAXPROCS(-1) < 4 {
-		runtime.GOMAXPROCS(4)
-	}
 }
