@@ -21,8 +21,8 @@ var INJECTABLE_CODE = []byte(`
 		}
 
 	} else {
-		window.alert("Browser does'nt support live reload. Please upgrade your browser (by LiveServer)")
-		console.log("Browser does'nt support live reload. Please upgrade your browser (by LiveServer)")
+		window.alert("Browser does'nt support live reload. Please upgrade your browser (by PhantomServer)")
+		console.log("Browser does'nt support live reload. Please upgrade your browser (by PhantomServer)")
 	}
 </script>
 `)
