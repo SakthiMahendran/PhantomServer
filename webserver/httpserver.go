@@ -155,7 +155,7 @@ func (hs *HttpServer) requestHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		hs.logger.LogInfo("Response: ", filePath)
-		hs.wsServer.AddFileListener(filePath)
+		go hs.wsServer.AddFileListener(filePath)
 
 	} else {
 		w.WriteHeader(http.StatusNotFound)

@@ -49,7 +49,7 @@ func (ws *WsServer) Start(w http.ResponseWriter, r *http.Request) {
 	lc := ws.mfListener.GetListenChan() //Getting the "listenChan" (Signal will come through this channel if any changes is made to the resource files)
 
 	//Starting a new goroutine
-	go func(w http.ResponseWriter, r *http.Request, listenChan <-chan struct{}) {
+	go func(listenChan <-chan struct{}) {
 		<-listenChan // Waiting for signal
 
 		ws.mfListener.Reset()
@@ -60,14 +60,18 @@ func (ws *WsServer) Start(w http.ResponseWriter, r *http.Request) {
 			ws.logger.LogErr(err.Error())
 		}
 
-	}(w, r, lc)
+	}(lc)
 }
 
 func (ws *WsServer) Reload() error {
 	if ws.con != nil { //"ws.con" should not be nil pointer
 		err := ws.con.WriteMessage(websocket.TextMessage, []byte("reload")) //Send reload message for JavaScript client in the webpage (That will be injected by HttpServer)
-		ws.con.Close()                                                      //Close the connection (Reloading makes the webpage to make another WebSocket request so close previous connection)
-		return err                                                          // return if any error
+
+		if err == nil {
+			ws.con.Close() //Close the connection (Reloading makes the webpage to make another WebSocket request so close previous connection)
+		}
+
+		return err // return if any error
 	} else {
 		return nil //Just return nil if "ws.con" is nil ptr
 	}
