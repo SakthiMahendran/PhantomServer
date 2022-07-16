@@ -115,6 +115,7 @@ func (hs *HttpServer) SetMainHtml(mainHtmlPath string) {
 	hs.mainHtmlPath = mainHtmlPath
 	hs.requestMap["/"] = mainHtmlPath
 
+	hs.wsServer.mfListener.Reset()
 	hs.wsServer.Reload()
 
 	hs.logger.LogInfo(mainHtmlPath, " was seted as MainHtml file.")

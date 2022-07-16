@@ -22,6 +22,7 @@ func NewFileListener(filePath string) FileListener {
 
 	fl.filePath = filePath //Setting the filePath (Path of the file to be listened).
 	fl.rate = RATE         //Setting the rate.
+	fl.stoped = false
 	//Note: the "fl.listenChan" will be setted by "MultiFileListener".
 
 	return fl //Returning the FileListener Object.
@@ -31,25 +32,32 @@ type FileListener struct {
 	filePath   string          //filePath defines the path of the file to be listened for changes.
 	rate       time.Duration   //rate defines the rate of listening for changes.
 	listenChan chan<- struct{} //if there is any changes in the file then signal will be send through this channel.
+	stoped     bool
 }
 
 //Starts the file listening
 func (fl *FileListener) Start() {
 	//Starts a new goroutine which will listen for the changes in the file.
-	go func(lstnChan chan<- struct{}, filePath string, rate time.Duration) {
+	go func() {
+		initStat, _ := os.Stat(fl.filePath) //Getting the initial file state.
+		initMod := initStat.ModTime()       //Getting the initial "Last Modified Date" of the file.
 
-		initStat, _ := os.Stat(filePath) //Getting the initial file state.
-		initMod := initStat.ModTime()    //Getting the initial "Last Modified Date" of the file.
+		for range time.Tick(fl.rate) { //Waiting for a time duration that is given by "rate" (Now it waits for 250ms).
+			if fl.stoped {
+				return
+			}
 
-		for range time.Tick(rate) { //Waiting for a time duration that is given by "rate" (Now it waits for 250ms).
+			lastStat, _ := os.Stat(fl.filePath) //Getting the current file state.
+			lastMod := lastStat.ModTime()       //Getting the current "Last Modified Date" of the file.
 
-			lastStat, _ := os.Stat(filePath) //Getting the current file state.
-			lastMod := lastStat.ModTime()    //Getting the current "Last Modified Date" of the file.
-
-			if lastMod != initMod { //Cheacking wheather the file is modified.
-				lstnChan <- struct{}{} //If modified sending singnal through the channel
-				initMod = lastMod      //Setting current "Last Modified Date" as initial "Last modified date".
+			if (lastMod != initMod) && !(fl.stoped) { //Cheacking wheather the file is modified.
+				fl.listenChan <- struct{}{} //If modified sending singnal through the channel
+				initMod = lastMod           //Setting current "Last Modified Date" as initial "Last modified date".
 			}
 		}
-	}(fl.listenChan, fl.filePath, fl.rate)
+	}()
+}
+
+func (fl *FileListener) Stop() {
+	fl.stoped = true
 }

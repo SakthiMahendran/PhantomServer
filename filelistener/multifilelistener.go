@@ -19,17 +19,17 @@ func NewMultiFileListener() MultiFileListener {
 }
 
 type MultiFileListener struct {
-	filePaths  []string      // Contains the paths of files to be listened for changes.
-	listenChan chan struct{} // Singnal will be send through this channel if there is changes in any file.
+	fileListeners []*FileListener // Contains the paths of files to be listened for changes.
+	listenChan    chan struct{}   // Singnal will be send through this channel if there is changes in any file.
 }
 
 //Adds a new "FileListener" to be handled.
-func (mfl *MultiFileListener) Add(fileListener FileListener) {
-	if !mfl.alreadyAdded(&fileListener) { // Checks wheather the file is already added.
+func (mfl *MultiFileListener) Add(fileListener *FileListener) {
+	if !mfl.alreadyAdded(fileListener) { // Checks wheather the file is already added.
 		//if not
-		mfl.filePaths = append(mfl.filePaths, fileListener.filePath) //Add the path of the file to filePaths.
-		fileListener.listenChan = mfl.listenChan                     //Sets the signaling channel for filelistener.
-		fileListener.Start()                                         //Starts the file listener.
+		mfl.fileListeners = append(mfl.fileListeners, fileListener) //Add the path of the file to filePaths.
+		fileListener.listenChan = mfl.listenChan                    //Sets the signaling channel for filelistener.
+		fileListener.Start()                                        //Starts the file listener.
 	}
 }
 
@@ -41,11 +41,20 @@ func (mfl *MultiFileListener) GetListenChan() <-chan struct{} {
 func (mfl *MultiFileListener) alreadyAdded(fileListener *FileListener) bool {
 	filePath := fileListener.filePath // Gets the "filePath" of fileListener.
 
-	for _, fp := range mfl.filePaths { //Checks wheather the filePath is in "filePaths" slice.
-		if filePath == fp {
+	for _, fp := range mfl.fileListeners { //Checks wheather the filePath is in "filePaths" slice.
+		if filePath == fp.filePath {
 			return true // return "true" if yes.
 		}
 	}
 
 	return false // else return "false".
+}
+
+func (mfl *MultiFileListener) Reset() {
+	for _, fl := range mfl.fileListeners {
+		fl.Stop()
+	}
+
+	mfl.fileListeners = nil
+	mfl.fileListeners = make([]*FileListener, 0)
 }
