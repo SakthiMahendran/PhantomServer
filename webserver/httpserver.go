@@ -57,8 +57,8 @@ func (hs *HttpServer) Start() {
 	go http.ListenAndServe(":"+hs.port, nil)
 
 	hs.logger.LogInfo("Server started.")
-
 	hs.logger.LogInfo("Opening webpage in browser.")
+
 	err := hs.util.openBrowser("http://localhost:" + hs.port + "/")
 
 	if err != nil {
@@ -72,12 +72,18 @@ func (hs *HttpServer) Start() {
 func (hs *HttpServer) SetPort(port string) {
 	hs.logger.LogInfo("Setting ", port, " as Server Port.")
 
-	if !hs.running {
-		hs.port = port
-		hs.logger.LogInfo("Server port is seted to ", port)
-	} else {
-		hs.logger.LogErr("Server already started can not change the port.")
+	if !hs.util.validPort(port) {
+		hs.logger.LogErr(port, "is not a valid port.")
+		return
 	}
+
+	if hs.running {
+		hs.port = port
+		hs.logger.LogErr("Server already started can not change the port.")
+		return
+	}
+
+	hs.logger.LogInfo("Server port is seted to ", port)
 }
 
 //Sets the FavIcon file path

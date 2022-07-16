@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strconv"
 )
 
 //code to be injected
@@ -49,6 +50,14 @@ func (*utility) hasHtml(filePath string) bool {
 //Checks wheather the given path is validPath
 func (*utility) validPath(filePath string) bool {
 	if _, err := os.Stat(filePath); err == nil {
+		return true
+	}
+
+	return false
+}
+
+func (*utility) validPort(port string) bool {
+	if _, err := strconv.Atoi(port); err == nil {
 		return true
 	}
 
