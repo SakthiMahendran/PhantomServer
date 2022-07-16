@@ -73,7 +73,7 @@ func (hs *HttpServer) SetPort(port string) {
 	hs.logger.LogInfo("Setting ", port, " as Server Port.")
 
 	if !hs.util.validPort(port) {
-		hs.logger.LogErr(port, "is not a valid port.")
+		hs.logger.LogErr(port, " is not a valid port.")
 		return
 	}
 
