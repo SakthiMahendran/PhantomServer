@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/SakthiMahendran/PhantomServer/statuslogger"
 	"github.com/SakthiMahendran/PhantomServer/webserver"
@@ -15,6 +16,7 @@ func init() {
 	if runtime.GOMAXPROCS(-1) < 4 {
 		runtime.GOMAXPROCS(4)
 	}
+
 }
 
 func main() {
@@ -39,7 +41,7 @@ func main() {
 
 func readln() string {
 	line, _ := reader.ReadString('\n')
-	line = line[:len(line)-1]
+	line = strings.TrimSpace(line)
 
 	return line
 }
