@@ -2,10 +2,8 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"runtime"
-	"strings"
 
 	"github.com/SakthiMahendran/PhantomServer/statuslogger"
 	"github.com/SakthiMahendran/PhantomServer/webserver"
@@ -30,11 +28,10 @@ func main() {
 
 	for {
 		sl.NewLine()
-		fmt.Print("Enter your command: ")
+		os.Stdout.WriteString("Enter your command: ")
 		cmd = readln()
 
 		if cmd != "" {
-			sl.LogInfo("Executing Command ", "\"", cmd, "\"")
 			cmdExe.exe(cmd)
 		}
 	}
@@ -42,7 +39,7 @@ func main() {
 
 func readln() string {
 	line, _ := reader.ReadString('\n')
-	line = strings.TrimSpace(line)
+	line = line[:len(line)-1]
 
 	return line
 }
