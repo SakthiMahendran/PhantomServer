@@ -22,9 +22,11 @@ type CmdExe struct {
 }
 
 func (ce *CmdExe) exe(cmd string) {
-	cmdArr := strings.Split(cmd, " ")
+	cmdArr := ce.removeSpace(strings.Split(cmd, " "))
 	key := strings.TrimSpace(cmdArr[0])
 	argsLen := len(cmdArr) - 1
+
+	ce.logger.LogInfo("Executing Command ", "\"", cmd, "\"")
 
 	switch key {
 	case "setmain":
@@ -78,4 +80,17 @@ func (ce *CmdExe) exe(cmd string) {
 		ce.logger.LogInfo("type \"help\" for Help.")
 		break
 	}
+
+}
+
+func (*CmdExe) removeSpace(cmdArr []string) []string {
+	resultArr := make([]string, 0)
+
+	for _, elem := range cmdArr {
+		if strings.TrimSpace(elem) != "" {
+			resultArr = append(resultArr, elem)
+		}
+	}
+
+	return resultArr
 }
