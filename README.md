@@ -1,16 +1,16 @@
-# LiveServer
+# PhantomServer
 
 ---
 ---
 
-## Why LiveServer :
+## Why PhantomServer :
 
-LiveServer is made to make webdeveloper's life easier with some useful features : ) 
+PhantomServer is made to make webdeveloper's life easier with some useful features : ) 
 
 ---
-## What is LiveServer:
+## What is PhantomServer:
 
-LiveServer is basically a http server with some useful features to make webdev easier that you can
+PhantomServer is basically a http server with some useful features to make webdev easier that you can
 run at your local machine to test your webpages.
 
 ---
@@ -42,7 +42,7 @@ Available soon... (Information about the architecture and working of LiveServer 
     Step 1 -> Install GoLang/Go in your local machine.
     Step 2 -> Clone the repository in your local machine.    
     Step 4 -> run cmd "go get github.com/gorilla/websocket".
-    Step 5 -> run cmd "go build" at the directory where "LiveServer.go" is placed.    
+    Step 5 -> run cmd "go build" at the directory where "PhantomServer.go" is placed.    
 now an Executable Binary will be produced in your current working directory.
 
 ---
