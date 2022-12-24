@@ -72,7 +72,7 @@ func (ce *CmdExe) exe(cmd string) {
 		fmt.Println("setmain   	-> Sets the path for MainHtml file (syntax: setmain MainHtmlPath).")
 		fmt.Println("setfavicon	-> Sets the path for PageIcon 	   (syntax: setfavicon FavIconPath).")
 		fmt.Println("start 	   	-> Starts the Http server at given port else in default port(80) (synatx: start PortNumber or start).")
-		fmt.Println("link 	   	-> Links a resourse with request (syntax: link ResPath ReqPath).")
+		fmt.Println("link 	   	-> Links a resourse with request (syntax: link ReqPath ResPath).")
 		fmt.Println("help      	-> Gives info about the available commands.")
 		break
 	default:
