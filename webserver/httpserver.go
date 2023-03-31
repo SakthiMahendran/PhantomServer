@@ -79,10 +79,11 @@ func (hs *HttpServer) SetPort(port string) {
 	}
 
 	if hs.running {
-		hs.port = port
 		hs.logger.LogErr("Server already started can not change the port.")
 		return
 	}
+
+	hs.port = port
 
 	hs.logger.LogInfo("Server port is set to ", port)
 }
