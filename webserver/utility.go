@@ -7,31 +7,31 @@ import (
 	"strconv"
 )
 
-//code to be injected
+// This constant holds the JavaScript code to be injected into HTML pages for live reloading
 var INJECTABLE_CODE = []byte(`
-<script>
-	if ('WebSocket' in window) {
-		var protocol = 'ws://';
-		var address = protocol + window.location.host + '/sakthi/mahendran/2005/ws'
-		var socket = new WebSocket(address);
-	
-		socket.onmessage = function (msg) {
-			if (msg.data == 'reload') {
-				window.location.reload();
+	<script>
+		if ('WebSocket' in window) {
+			var protocol = 'ws://';
+			var address = protocol + window.location.host + '/sakthi/mahendran/2005/ws'
+			var socket = new WebSocket(address);
+		
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') {
+					window.location.reload();
+				}
 			}
+	
+		} else {
+			window.alert("Browser does'nt support live reload. Please upgrade your browser (by PhantomServer)")
+			console.log("Browser does'nt support live reload. Please upgrade your browser (by PhantomServer)")
 		}
-
-	} else {
-		window.alert("Browser does'nt support live reload. Please upgrade your browser (by PhantomServer)")
-		console.log("Browser does'nt support live reload. Please upgrade your browser (by PhantomServer)")
-	}
-</script>
+	</script>
 `)
 
 type utility struct {
 }
 
-//injects the code from INJECTABLE_CODE_PATH
+// This method injects the INJECTABLE_CODE into the HTML file specified by htmlFilePath
 func (*utility) injectCode(htmlFilePath string) ([]byte, error) {
 	fileContent, err := os.ReadFile(htmlFilePath)
 
@@ -42,12 +42,12 @@ func (*utility) injectCode(htmlFilePath string) ([]byte, error) {
 	return append(fileContent, INJECTABLE_CODE...), nil
 }
 
-//Checks whether the given filepath contains html file
+// This method checks whether the file specified by filePath is an HTML file
 func (*utility) hasHtml(filePath string) bool {
 	return filePath[len(filePath)-5:] == ".html"
 }
 
-//Checks wheather the given path is validPath
+// This method checks whether the file specified by filePath exists
 func (*utility) validPath(filePath string) bool {
 	if _, err := os.Stat(filePath); err == nil {
 		return true
@@ -56,6 +56,7 @@ func (*utility) validPath(filePath string) bool {
 	return false
 }
 
+// This method checks whether the given port is valid
 func (*utility) validPort(port string) bool {
 	if _, err := strconv.Atoi(port); err == nil {
 		return true
@@ -64,7 +65,7 @@ func (*utility) validPort(port string) bool {
 	return false
 }
 
-//Opens the URL in default browser.
+// This method opens the specified URL in the default browser
 func (*utility) openBrowser(url string) error {
 	var cmd string
 	var args []string

@@ -5,81 +5,75 @@ import (
 
 	"github.com/SakthiMahendran/PhantomServer/filelistener"
 	"github.com/SakthiMahendran/PhantomServer/statuslogger"
-
 	"github.com/gorilla/websocket"
 )
 
-//First read the code in "filelistener" package, description and then the code line by line with the comments to for a better understanding.
+// WsServer is a WebSocket server that reloads the webpage if there are changes made to resource files served by the HTTP server.
+type WsServer struct {
+	mfListener filelistener.MultiFileListener // MultiFileListener for listening to changes in resource files.
+	con        *websocket.Conn                // WebSocket connection for reloading webpage.
+	logger     *statuslogger.StatusLogger     // StatusLogger for logging.
+}
 
-//Description
-/*
-	WsServer (WebSocket Server) will reload the webpage if there is any
-	changes made to resource file that is served by the HttpServe.
-*/
-
-// Makes a new WsServer.
+// NewWsServer creates a new WsServer.
 func NewWsServer(sl *statuslogger.StatusLogger) WsServer {
-	ws := WsServer{}                                    //Instantiation.
-	ws.mfListener = filelistener.NewMultiFileListener() //Setting the "MultiFileListener" (for listening changes in resource file).
-	ws.logger = sl                                      // Setting the statuslogger (for logging).
-
+	ws := WsServer{
+		mfListener: filelistener.NewMultiFileListener(), // Initialize MultiFileListener.
+		logger:     sl,                                  // Set StatusLogger.
+	}
 	return ws
 }
 
-type WsServer struct {
-	mfListener filelistener.MultiFileListener //"MultiFileListener" for listening changes in resource file.
-	con        *websocket.Conn                // WebSocket connection for reloading webpage.
-	logger     *statuslogger.StatusLogger     //"StatusLogger" for logging.
-}
-
-// UpGrades a Http connection into a WebSocket connection.
+// Start upgrades a HTTP connection to a WebSocket connection and listens for changes in resource files.
 func (ws *WsServer) Start(w http.ResponseWriter, r *http.Request) {
-	up := websocket.Upgrader{ // Defining buffer size.
-		ReadBufferSize:  0, // No data is going to be readed.
-		WriteBufferSize: 32,
+	// Upgrade HTTP connection to WebSocket connection.
+	up := websocket.Upgrader{
+		ReadBufferSize:  0,  // No data is going to be read.
+		WriteBufferSize: 32, // Set write buffer size.
 	}
 
-	con, err := up.Upgrade(w, r, nil) //Upgrading
-
-	if err != nil { //Cheacking for error
-		ws.logger.LogErr(err.Error()) //if error then log error
-		return                        // and return
+	con, err := up.Upgrade(w, r, nil)
+	if err != nil {
+		// If there is an error, log it and return.
+		ws.logger.LogErr(err.Error())
+		return
 	}
 
-	ws.con = con                        //Writting the connection obeject pointer into shared memory (else it will be cleared when it exits the scope)
-	lc := ws.mfListener.GetListenChan() //Getting the "listenChan" (Signal will come through this channel if any changes is made to the resource files)
+	ws.con = con // Store the connection object pointer in shared memory.
 
-	//Starting a new goroutine
+	// Get the listen channel.
+	lc := ws.mfListener.GetListenChan()
+
+	// Listen for changes in resource files and reload the webpage.
 	go func(listenChan <-chan struct{}) {
-		<-listenChan // Waiting for signal
-
+		<-listenChan // Wait for signal.
 		ws.mfListener.Reset()
 		for {
-			err := ws.Reload() // Reloading the webpage
-
-			if err != nil { // If there is error try again
+			err := ws.Reload() // Reload the webpage.
+			if err != nil {    // If there is an error, try again.
 				continue
 			}
 		}
 	}(lc)
 }
 
+// Reload sends a reload message to the JavaScript client in the webpage, and then closes the WebSocket connection.
 func (ws *WsServer) Reload() error {
-	if ws.con != nil { //"ws.con" should not be nil pointer
-		err := ws.con.WriteMessage(websocket.TextMessage, []byte("reload")) //Send reload message for JavaScript client in the webpage (That will be injected by HttpServer)
-
+	if ws.con != nil {
+		// If ws.con is not nil, send a reload message to the JavaScript client.
+		err := ws.con.WriteMessage(websocket.TextMessage, []byte("reload"))
 		if err == nil {
-			ws.con.Close() //Close the connection (Reloading makes the webpage to make another WebSocket request so close previous connection)
+			ws.con.Close() // Close the connection.
 		}
-
-		return err // return if any error
+		return err // Return any error.
 	} else {
-		return nil //Just return nil if "ws.con" is nil ptr
+		return nil // Return nil if ws.con is nil.
 	}
 }
 
-// Adds a new FileListener
+// AddFileListener adds a new FileListener to the MultiFileListener.
 func (ws *WsServer) AddFileListener(filePath string) {
-	fl := filelistener.NewFileListener(filePath) // Makes a new FileListener
-	ws.mfListener.Add(&fl)                       //Add it to MultiFileListener
+	// Create a new FileListener and add it to the MultiFileListener.
+	fl := filelistener.NewFileListener(filePath)
+	ws.mfListener.Add(&fl)
 }
