@@ -17,7 +17,7 @@ import (
 	changes made to resource file that is served by the HttpServe.
 */
 
-//Makes a new WsServer.
+// Makes a new WsServer.
 func NewWsServer(sl *statuslogger.StatusLogger) WsServer {
 	ws := WsServer{}                                    //Instantiation.
 	ws.mfListener = filelistener.NewMultiFileListener() //Setting the "MultiFileListener" (for listening changes in resource file).
@@ -32,7 +32,7 @@ type WsServer struct {
 	logger     *statuslogger.StatusLogger     //"StatusLogger" for logging.
 }
 
-//UpGrades a Http connection into a WebSocket connection.
+// UpGrades a Http connection into a WebSocket connection.
 func (ws *WsServer) Start(w http.ResponseWriter, r *http.Request) {
 	up := websocket.Upgrader{ // Defining buffer size.
 		ReadBufferSize:  0, // No data is going to be readed.
@@ -54,13 +54,13 @@ func (ws *WsServer) Start(w http.ResponseWriter, r *http.Request) {
 		<-listenChan // Waiting for signal
 
 		ws.mfListener.Reset()
-		err := ws.Reload() // Reloading the webpage
+		for {
+			err := ws.Reload() // Reloading the webpage
 
-		if err != nil {
-			//If error then log
-			ws.logger.LogErr(err.Error())
+			if err != nil { // If there is error try again
+				continue
+			}
 		}
-
 	}(lc)
 }
 
@@ -78,7 +78,7 @@ func (ws *WsServer) Reload() error {
 	}
 }
 
-//Adds a new FileListener
+// Adds a new FileListener
 func (ws *WsServer) AddFileListener(filePath string) {
 	fl := filelistener.NewFileListener(filePath) // Makes a new FileListener
 	ws.mfListener.Add(&fl)                       //Add it to MultiFileListener
