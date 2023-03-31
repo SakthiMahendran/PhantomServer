@@ -13,10 +13,10 @@ import (
 then send a signal in a channel (listenChan) if there is any changes made to the file.
 */
 
-//RATE defines the rate at which the file is checked for changes (i.e Now the file is checked on every 250ms for changes).
+// RATE defines the rate at which the file is checked for changes (i.e Now the file is checked on every 250ms for changes).
 const RATE time.Duration = time.Millisecond * 250
 
-//Makes a new FileListener.
+// Makes a new FileListener.
 func NewFileListener(filePath string) FileListener {
 	fl := FileListener{} //Instantiation.
 
@@ -35,15 +35,18 @@ type FileListener struct {
 	stoped     bool
 }
 
-//Starts the file listening
+// Starts the file listening
 func (fl *FileListener) Start() {
 	//Starts a new goroutine which will listen for the changes in the file.
 	go func() {
 		initStat, _ := os.Stat(fl.filePath) //Getting the initial file state.
 		initMod := initStat.ModTime()       //Getting the initial "Last Modified Date" of the file.
 
-		for range time.Tick(fl.rate) { //Waiting for a time duration that is given by "rate" (Now it waits for 250ms).
+		ticker := time.NewTicker(fl.rate)
+
+		for range ticker.C { //Waiting for a time duration that is given by "rate" (Now it waits for 250ms).
 			if fl.stoped {
+				ticker.Stop()
 				return
 			}
 
